@@ -33,8 +33,10 @@ class MarkovChainSuite extends FunSuite {
     val d2 = new Data(0,1)
     val d3 = new Data(1,0)
     val d4 = new Data(1,1)
+    val d5 = new Data(0,0)
     fui.put(d1) ; fui.put(d2);fui.put(d3);fui.put(d4)
     chain.train(fui)
+    chain.deepPrint
   }
 
 }
