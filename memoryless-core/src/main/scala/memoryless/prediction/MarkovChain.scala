@@ -5,10 +5,18 @@ import keyless.api.hash.HashableFunction
 import keyless.index.{NonUniqueIndex, FullUniqueIndex}
 
 import Array._
-case class Data(dimension:Int,feature:Int)
-class MarkovChain(val dimension:Int, val featureVariations:Int)(val threshold:Double = 0.95) {
+case class Data(id:String,dimension:Int,feature:Int)
+class MarkovChain(val dimension:Int, val featureVariations:Int,var transition:Array[Array[Array[Double]]],val threshold:Double = 0.95) {
 
+  def this( dimension:Int,  featureVariations:Int) =
+  {
+    this(dimension,featureVariations,ofDim(dimension, featureVariations,featureVariations),0.95)
+  }
 
+  def this( dimension:Int,  featureVariations:Int, threshold:Double) =
+  {
+    this(dimension,featureVariations,ofDim(dimension, featureVariations,featureVariations),threshold)
+  }
 
   import java.util.function.{Function ⇒ JFunction, Predicate ⇒ JPredicate}
 
@@ -23,7 +31,6 @@ class MarkovChain(val dimension:Int, val featureVariations:Int)(val threshold:Do
   }
 
 
-  val transition :Array[Array[Array[Double]]] = ofDim(dimension,featureVariations,featureVariations)
 
   def deepPrint =  {
     println(transition.deep.mkString("\n"))
@@ -31,7 +38,7 @@ class MarkovChain(val dimension:Int, val featureVariations:Int)(val threshold:Do
 
   def train(history:FullUniqueIndex[Data]) =
   {
-    val rewrite:NonUniqueIndex[Data] = new NonUniqueIndex( new HashableFunction((d:Data)=>d.dimension),history.getStrategy)
+    val rewrite:NonUniqueIndex[Data] = new NonUniqueIndex( new HashableFunction((d:Data)=>d.dimension),new HashableFunction((d:Data)=>d.id))
     history.foreach(new Procedure[Data] {
       override def execute(o: scala.Any): Boolean = {
         if (o != null && o.isInstanceOf[Data])
@@ -39,7 +46,8 @@ class MarkovChain(val dimension:Int, val featureVariations:Int)(val threshold:Do
         return true
       }
     })
-    rewrite.foreach( new Procedure[Data] {
+
+    rewrite.forEachGroup( new Procedure[Data] {
       var previousFeature = -1
       var previousDimension = -1
 
@@ -47,14 +55,29 @@ class MarkovChain(val dimension:Int, val featureVariations:Int)(val threshold:Do
 
         if (o.isInstanceOf[Data]) {
 
-          var currentFeature = o.asInstanceOf[Data].feature
-          var currentDimension = o.asInstanceOf[Data].dimension
-          if (previousDimension == currentDimension)
-            transition(currentDimension)(previousFeature)(currentFeature)+=1
-          else
-            transition(currentDimension)(currentFeature)(currentFeature)=1
-          previousDimension =currentDimension;
-          previousFeature=currentFeature;
+          val currentFeature = o.asInstanceOf[Data].feature
+          val currentDimension = o.asInstanceOf[Data].dimension
+
+          transition(currentDimension)(currentFeature)(currentFeature)=1
+
+        } else if (o.isInstanceOf[FullUniqueIndex[Data]]) {
+          o.asInstanceOf[FullUniqueIndex[Data]].foreach(new Procedure[Data] {
+            override def execute(e: scala.Any): Boolean = {
+
+              val currentFeature = e.asInstanceOf[Data].feature
+              val currentDimension = e.asInstanceOf[Data].dimension
+              if (previousFeature >=0)
+                transition(currentDimension)(previousFeature)(currentFeature)+=1
+              else
+                transition(currentDimension)(currentFeature)(currentFeature)=1
+               previousFeature=currentFeature;
+
+              return true;
+            }
+          })
+
+
+
         }
         return true
       }
