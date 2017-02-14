@@ -76,12 +76,28 @@ class MarkovChain(val dimension:Int, val featureVariations:Int,var transition:Ar
             }
           })
 
-
-
         }
         return true
       }
     })
+
+
+
+
+
+
+
+  }
+
+  def normalize():Array[Array[Array[Double]]] = {
+    val normalized = transition.map(d => {
+      val rowSum =d.map(_.sum)
+
+      d.map( row => row zip rowSum map {case (r,s) => if (s>0)r/s else 0 }  )
+
+    })
+    println(normalized.deep.mkString("\n"))
+    normalized
 
   }
 

@@ -28,20 +28,24 @@ class MarkovChainSuite extends FunSuite {
 
 
   test("train") {
-    val chain:MarkovChain = new MarkovChain(3,4)
-    val fui:FullUniqueIndex[Data] = new FullUniqueIndex[Data]((d:Data)=>d.dimension + ":" + d.feature)
+    val chain:MarkovChain = new MarkovChain(3,2)
+    val fui:FullUniqueIndex[Data] = new FullUniqueIndex[Data]((d:Data)=>d.id )
 
-    val d1 = new Data(UUID.randomUUID().toString,0,0)
-    val d2 = new Data(UUID.randomUUID().toString,0,1)
+    val d1 = new Data(UUID.randomUUID().toString,0,1)
+    val d2 = new Data(UUID.randomUUID().toString,0,0)
     val d3 = new Data(UUID.randomUUID().toString,1,0)
     val d4 = new Data(UUID.randomUUID().toString,1,1)
     val d5 = new Data(UUID.randomUUID().toString,0,0)
-    val d6 = new Data(UUID.randomUUID().toString,0,1)
-    val d7 = new Data(UUID.randomUUID().toString,1,0)
-    fui.put(d1) ; fui.put(d2);fui.put(d3);fui.put(d4)
+    val d6 = new Data(UUID.randomUUID().toString,1,0)
+    val d7 = new Data(UUID.randomUUID().toString,2,0)
+    fui.put(d1) ; fui.put(d2);
+    fui.put(d3);fui.put(d4)
     fui.put(d5); fui.put(d6);fui.put(d7)
     chain.train(fui)
+    println("Markov Chain.")
     chain.deepPrint
+    println("Normalized Chain.")
+    chain.normalize()
   }
 
 }
