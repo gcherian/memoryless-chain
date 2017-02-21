@@ -10,7 +10,7 @@ import org.scalatest.FunSuite
 /**
   * Created by gcherian on 2/7/2017.
   */
-class MarkovChainSuite extends FunSuite {
+class MemorylessSuite extends FunSuite {
 
 
 
@@ -24,6 +24,17 @@ class MarkovChainSuite extends FunSuite {
 
   implicit def toJavaPredicate[A](f: Function1[A, Boolean]) = new JPredicate[A] {
     override def test(a: A): Boolean = f(a)
+  }
+  test("classify") {
+
+    val c1= Array[Double](1.2,1.3,1.7,1.8,2.0)
+    val c2 = Array[Double](2.1,2.2,2.3,2.6,2.7)
+
+    val d1=AutoClassifier.classify(0,2,c1)
+    val d2=AutoClassifier.classify(1,2,c2)
+    d1.foreach(println(_))
+    d2.foreach(println(_))
+
   }
 
 

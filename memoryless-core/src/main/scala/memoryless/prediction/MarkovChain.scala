@@ -5,7 +5,8 @@ import keyless.api.hash.HashableFunction
 import keyless.index.{NonUniqueIndex, FullUniqueIndex}
 
 import Array._
-case class Data(id:String,dimension:Int,feature:Int)
+
+case class  Data(id:String, dimension:Int, feature:Int)
 class MarkovChain(val dimension:Int, val featureVariations:Int,var transition:Array[Array[Array[Double]]],val threshold:Double = 0.95) {
 
   def this( dimension:Int,  featureVariations:Int) =
